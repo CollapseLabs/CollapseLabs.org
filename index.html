@@ -9,57 +9,77 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
-    <!-- Custom styles for this template -->
     <style>
-        .vh-100 {
-            height: 100vh;
-        }
-
         .jumbotron {
             margin-bottom: 0;
         }
 
         .banner-image {
             background-image: url("./img/9559421360_21326634ca_z.jpg");
+            background-position: center;
             background-size: cover;
+        }
+
+        /* https://jrl.ninja/etc/1/ */
+        .text-content {
+            max-width: 70ch;
+            margin: auto;
+            padding: 2ch;
+        }
+
+        @media (max-width: 512px) {
+            .display-1 {
+                font-size: calc(1.725rem + 5.7vw);
+            }
+        }
+
+        h1 {
+            margin-bottom: 4vh;
+        }
+
+        p {
+            margin-bottom: 3vh;
         }
     </style>
 </head>
 
 <body class="text-monospace">
     <main role="main">
-        <section class="jumbotron text-center bg-dark text-light vh-100">
-            <div class="container">
-                <h1 class="display-1 p-3 headline" style="text-transform: uppercase">Collapse</h1>
-                <p class="lead p-3">Our current societal systems are failing. Like it or not, we are entering a time of
-                    turbulent, shocking, even painful change.</p>
-                <p class="p-3">If anything, now is the time to dream bigger and aim further. Beyond merely sustainable.
-                </p>
-                <p class="pl-3 pr-3">Now is the time to gather our friends, develop our skills, and create the world we
-                    want.
-                </p>
-                <p class="p-3">Because the post-sustainable world can and shall be wonderful.</p>
+        <section>
+            <div class="row min-vh-100 bg-dark">
+                <div class="text-content col-12 text-light">
+                    <h1 class="display-1" style="text-transform: uppercase">Collapse</h1>
+                    <p class="lead">Our current societal systems are failing. Like it or not, we are entering
+                        a time of turbulent, shocking, even painful change.</p>
+                    <p>If anything, now is the time to dream bigger and aim further. Beyond merely
+                        sustainable.</p>
+                    <p>Now is the time to gather our friends, develop our skills, and create
+                        the world we want.</p>
+                    <p>Because the post-sustainable world can and shall be wonderful.</p>
+                </div>
             </div>
         </section>
-
-        <div class="banner-image vh-100"></div>
-
-        <section class="jumbotron text-center bg-light vh-100">
-            <div class="container">
-                <h1 class="display-1 p-3 headline" style="text-transform: uppercase">Labs</h1>
-                <p class="lead p-3">Collapse Labs is a do-tank.</p>
-                <p class="pl-3 pr-3 text-muted">We are dreamers.<br>We are builders.<br>
-                    We are futurists.<br>We are historians.<br>
-                    We are technologists.<br>We are naturalists.</p>
-                <p class="p-3">Our mission is not just to envision a world beyond
-                    sustainability, one that is healthy and humane, but also make it happen.</p>
-                <p class="pl-3 pr-3">Because the post-sustainable world can and shall be wonderful.</p>
-            </div>
+        <section>
+            <div class="row min-vh-100 banner-image"></div>
         </section>
+        <section>
+            <div class="row min-vh-100 bg-light">
+                <div class="text-content col-12 text-right">
+                    <h1 class="display-1" style="text-transform: uppercase">Labs</h1>
+                    <p class="lead">Collapse Labs is a do-tank.</p>
+                    <p class="text-muted">We are dreamers.<br>We are builders.<br>
+                        We are futurists.<br>We are historians.<br>
+                        We are technologists.<br>We are naturalists.</p>
+                    <p>Our mission is not just to envision a world beyond
+                        sustainability, one that is healthy and humane, but also make it happen.</p>
+                    <p>Because the post-sustainable world can and shall be wonderful.</p>
+                </div>
+            </div>
+            <section>
     </main>
 
-    <footer class="mastfoot pt-5 mt-auto text-center">
-        <div class="inner">
+    <footer class="mastfoot pt-5 mt-auto">
+        <div class="text-content text-center" style="padding-top: 0px; padding-bottom: 0px">
             <p><a href="mailto:hello@collapselabs.org">hello@collapselabs.org</a><br>
                 Lisbon • Oslo • Stockholm</p>
 
@@ -68,7 +88,6 @@
                         Dixon on Flickr</a> (CC BY 2.0)</small></p>
         </div>
     </footer>
-
 </body>
 
 </html>
