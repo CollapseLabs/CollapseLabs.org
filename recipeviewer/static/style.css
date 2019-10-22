@@ -1,0 +1,44 @@
+/* https://jrl.ninja/etc/1/ */
+main {
+  max-width: 70ch;
+  padding: 2ch;
+  margin: auto;
+}
+
+.ingredient-item {
+}
+
+.ingredient-checkbox {
+}
+
+.ingredient-amount {
+  /* color: blue; */
+}
+
+.ingredient-name {
+  font-weight: bold;
+}
+
+.ingredient-staple {
+  font-weight: normal;
+  /* color: gray; */
+}
+
+.ingredient-comment {
+  /* color: gray; */
+}
+
+.instruction-step {
+  margin-bottom: 1.5rem;
+}
+
+.instruction-checkbox {
+  zoom: 1.5;
+  position: absolute;
+  margin-left: -32px;
+  margin-top: 6px;
+}
+
+[class^="instruction-ingredient-"] {
+  font-weight: bold;
+}

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ recipe.name }}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <main>
+        <h1>{{ recipe.name }}</h1>
+        <p>Yield: {{ recipe.recipe_yield }}<br>
+            Total time: {{ recipe.total_time }}</p>
+        <ul>
+            {% for ingredient in recipe.ingredients %}
+            <li class="ingredient-item">
+                {% if not ingredient.get('is_staple') %}
+                <input class="ingredient-checkbox" type="checkbox">
+                {% endif %}
+
+                {% if ingredient.get('amount') %}
+                <span class="ingredient-amount">{{ ingredient['amount'] }}</span>
+                {% endif %}
+
+                {% if ingredient.get('unit') %}
+                <span class="ingredient-unit">{{ ingredient['unit'] }}</span>
+                {% endif %}
+
+                {% if ingredient.get('is_staple') %}
+                <span class="ingredient-name ingredient-staple">{{ ingredient['name'] }}</span>
+                {% else %}
+                <span class="ingredient-name">{{ ingredient['name'] }}</span>
+                {% endif %}
+
+                {% if ingredient.get('comment') %}
+                <span class="ingredient-comment">({{ ingredient['comment'] }})</span>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        <ol style="font-size: x-large;">
+            {% for instruction in recipe.instructions_html %}
+            <li class="instruction-step">
+                <input class="instruction-checkbox" type="checkbox">
+                <span class="instruction-text">{{ instruction|safe }}</span>
+            </li>
+            {% endfor %}
+        </ol>
+
+        <p><input type="checkbox" class="checkmark"> <a href="javascript:alert('not implemented')">Mark as Done</a>
+        </p>
+    </main>
+
+    <footer>
+        <p><a href="javascript:alert('not implemented')">Report a Problem</a></p>
+    </footer>
+</body>
+
+</html>
