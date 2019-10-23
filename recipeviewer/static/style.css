@@ -5,15 +5,14 @@ main {
   margin: auto;
 }
 
-.ingredient-item {
-}
+/* .ingredient-item {
+} */
 
-.ingredient-checkbox {
-}
+/* .ingredient-checkbox {
+} */
 
-.ingredient-amount {
-  /* color: blue; */
-}
+/* .ingredient-amount {
+} */
 
 .ingredient-name {
   font-weight: bold;
@@ -21,12 +20,10 @@ main {
 
 .ingredient-staple {
   font-weight: normal;
-  /* color: gray; */
 }
 
-.ingredient-comment {
-  /* color: gray; */
-}
+/* .ingredient-comment {
+} */
 
 .instruction-step {
   margin-bottom: 1.5rem;
@@ -35,10 +32,14 @@ main {
 .instruction-checkbox {
   zoom: 1.5;
   position: absolute;
-  margin-left: -32px;
+  margin-left: -40px;
   margin-top: 6px;
 }
 
 [class^="instruction-ingredient-"] {
   font-weight: bold;
 }
+
+/* .instruction-time-duration {
+  color: blue;
+} */

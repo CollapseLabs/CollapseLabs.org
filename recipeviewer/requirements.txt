@@ -1,0 +1,5 @@
+Flask==1.1.1
+microdata==0.7.1
+beautifulsoup4==4.8.1
+html5lib==1.0.1
+nltk==3.4.5

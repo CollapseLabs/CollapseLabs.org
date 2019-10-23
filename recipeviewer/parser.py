@@ -1,17 +1,22 @@
-from dataclasses import dataclass, asdict
-import json
 import re
 import unicodedata
 
-
-import lxml.html
+from bs4 import BeautifulSoup
+import langdetect
 import nltk
 from nltk.stem import SnowballStemmer
-import microdata
 
 # from rdflib.plugins.parsers.pyMicrodata import pyMicrodata
 
-stemmer = SnowballStemmer("swedish")
+
+staple_ingredient_names = {
+    "sv": ["olivolja", "salt", "svartpeppar", "vinäger", "socker"],
+    "en": ["Salt and freshly ground black pepper"],
+}
+ingredient_units = {
+    "sv": ["burk", "påse", "knippe", "förpackning", "portion"],
+    "en": ["tablespoons", "cups"],
+}
 
 
 def slugify(s):
@@ -22,18 +27,8 @@ def slugify(s):
     return slug
 
 
-@dataclass
-class Recipe:
-    name: str = None
-    image_url: str = None
-    total_time: str = None
-    recipe_yield: str = None
-    ingredients: list = None
-    instructions: list = None
-    instructions_html: list = None
-
-
-def annotate_recipe_instruction(text, ingredients):
+def annotate_recipe_instruction(text, ingredients, stemmer):
+    # Annotate mentions of the name stem
     ingredient_namestem_to_id = {}
     for ingredient in ingredients:
         if not ingredient.get("is_staple"):
@@ -43,7 +38,6 @@ def annotate_recipe_instruction(text, ingredients):
     matches = []
     for namestem in ingredient_namestem_to_id.keys():
         matches.extend(list(re.finditer(rf"(\b({namestem})\w*\b)", text)))
-
     matches.sort(key=re.Match.start)
 
     offset = 0
@@ -61,29 +55,56 @@ def annotate_recipe_instruction(text, ingredients):
         )
         offset = offset + len(begin_tag) + len(end_tag)
 
+    # Annotate time durations
+    matches = list(re.finditer(r"(\b(\d+([\-–]\d+)? min\w*)\b)", text))
+    offset = 0
+    for m in matches:
+        start, end = m.span(1)
+        begin_tag = f'<span class="instruction-time-duration"><a href="javascript:alert(\'not implemented\')">'
+        end_tag = "</a></span>"
+        text = (
+            text[: start + offset]
+            + begin_tag
+            + text[start + offset : end + offset]
+            + end_tag
+            + text[end + offset :]
+        )
+        offset = offset + len(begin_tag) + len(end_tag)
+
     return text
 
 
-def parse_recipe_item(item):
-    recipe = Recipe()
-    recipe.name = item.name.strip()
-    recipe.image_url = str(item.image) if str(item.image) else None
-    recipe.total_time = item.totalTime.strip()
-    recipe.recipe_yield = item.recipeYield.strip()
-    ingredient_lines = [
-        re.sub(r"\s+", " ", s).strip() for s in item.get_all("recipeIngredient")
-    ]
+def parse_recipe(recipe):
+    assert recipe
+
+    # soup = BeautifulSoup(html, "lxml")
+    # [s.decompose() for s in soup("script")]  # remove <script> elements
+    # body_text = soup.body.get_text()
+    # recipe.lang = detect(body_text)
+    instructions_text = "\n".join(recipe.instructions_raw)
+    recipe.lang = langdetect.detect(instructions_text)
+
+    lang_code_to_name = {"en": "english", "sv": "swedish"}
+    lang_name = lang_code_to_name.get(recipe.lang, "english")
+    stemmer = SnowballStemmer(lang_name)
+
+    recipe.total_time = recipe.total_time_raw  # TODO
+    recipe.recipe_yield = recipe.recipe_yield_raw  # TODO
+
+    ingredient_lines = [re.sub(r"\s+", " ", s).strip() for s in recipe.ingredients_raw]
     recipe.ingredients = []
     for line in ingredient_lines:
         ingredient = {}
-        m = re.match(r"([\d¼½¾⅓⅔\-–]+) (.+)", line)
+        m = re.match(r"(([\d¼½¾⅓⅔\-– ]| to )+) \b(.+)", line)
         if m:
             ingredient["amount"] = m.group(1)
-            ingredient["name"] = m.group(2)
+            ingredient["name"] = m.group(3)
         else:
             ingredient["name"] = line
 
-        m = re.match(r"((burk|påse|knippe|förpackning) )?(.+)", ingredient["name"])
+        m = re.match(
+            fr"(({'|'.join(ingredient_units[recipe.lang])}) )?(.+)", ingredient["name"]
+        )
         if m:
             ingredient["unit"] = m.group(2)
             ingredient["name"] = m.group(3)
@@ -93,7 +114,7 @@ def parse_recipe_item(item):
             ingredient["name"] = m.group(1)
             ingredient["comment"] = m.group(2)
 
-        if ingredient["name"] in ["olivolja", "salt", "svartpeppar", "vinäger"]:
+        if ingredient["name"] in staple_ingredient_names[recipe.lang]:
             ingredient["is_staple"] = True
 
         ingredient["id"] = slugify(ingredient["name"])
@@ -103,47 +124,32 @@ def parse_recipe_item(item):
     for ingredient in recipe.ingredients:
         recipe.ingredient_map[ingredient["id"]] = ingredient
 
-    text = item.get("recipeInstructions")
-    text = re.sub(r"\d+\.\xa0", "\n\n", text)
-    text = re.sub(r"Gör så här:", "", text)
-    recipe.instructions = [line.strip() for line in text.split("\n") if line.strip()]
+    text = re.sub(r"\b\d+\.[\xa0 ]\b", "\n\n", "\n".join(recipe.instructions_raw))
+    text = re.sub(r"Gör så här:", "\n", text)
+    text = re.sub(r"\bServering", "\n", text)
+    instructions_cleaned = [line.strip() for line in text.split("\n") if line.strip()]
 
     recipe.instructions_html = []
-    for line in recipe.instructions:
-        line = annotate_recipe_instruction(line, recipe.ingredients)
+    for line in instructions_cleaned:
+        line = annotate_recipe_instruction(line, recipe.ingredients, stemmer)
         recipe.instructions_html.append(line)
 
-    return recipe
 
+if __name__ == "__main__":
+    from recipe import extract_recipe_from_url, pprint_recipe
+    import os
+    import sys
+    import urllib.parse
 
-def parse_recipe(path):
-    # print(pyMicrodata().rdf_from_source(path).decode("utf-8"))
+    if len(sys.argv) < 2:
+        print("usage: parser.py PATH")
+        exit(1)
 
-    with open(path, "rb") as f:
-        root = lxml.html.parse(f).getroot()
-        lang = root.attrib.get("lang")
-        print(lang)
+    path = os.path.realpath(sys.argv[1])
+    url = urllib.parse.urlunparse(("file", "", path, "", "", ""))
 
-    # from bs4 import BeautifulSoup
-    # from langdetect import detect
+    recipe = extract_recipe_from_url(url)
+    assert recipe
 
-    # with open(path, "rb") as f:
-    #     soup = BeautifulSoup(f, "lxml")
-    #     [s.decompose() for s in soup("script")]  # remove <script> elements
-    #     body_text = soup.body.get_text()
-    #     print(detect(body_text))
-
-    with open(path, "rb") as f:
-        items = microdata.get_items(f)
-        for item in items:
-            if str(item.itemtype[0]) == "https://schema.org/Recipe":
-                recipe = parse_recipe_item(item)
-                print(
-                    json.dumps(
-                        asdict(recipe), sort_keys=True, indent=4, ensure_ascii=False
-                    )
-                )
-                print(recipe.ingredient_map)
-                return recipe
-
-    return None
+    parse_recipe(recipe)
+    pprint_recipe(recipe)
